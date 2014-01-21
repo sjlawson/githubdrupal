@@ -1,0 +1,11 @@
+; $id$
+
+name=githubdrupal
+description = Drupal module to display a dynamic list of public repositories for a GitHub account
+author = Samuel Lawson
+package = Github on Drupal
+core = 7.x
+files[] = githubdrupal.module
+stylesheets[all][] = githubdrupal.css 
+
+configure = admin/config/system/githubdrupal

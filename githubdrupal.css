@@ -1,0 +1,17 @@
+@charset "UTF-8"; 
+
+.indent {
+	margin-left:5em;
+	display: block;
+	border-bottom: 1px dashed black;
+}
+.repositories {
+	
+}
+.repositories li {
+	margin: 5px;
+	background-color: beige;
+}
+.repositories li a {
+	font-size: 14pt;	
+	}

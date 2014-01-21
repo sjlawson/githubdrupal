@@ -1,0 +1,106 @@
+<?php
+/**
+ * @author Samuel Lawson
+ * 
+ * Page items
+ */
+function githubdrupal_menu() {
+	 $items = array();
+	 
+	 $items['github_drupal'] = array(
+	      'title'=>t('GitHub on Drupal'),
+	      'path'=>'githubdrupal',
+	      'page callback'=>'githubdrupal_output',
+	      'access arguments'=>array('access content')
+	      );
+	      
+	 $items['admin/settings/githubdrupal'] = array ( 
+		'title' => 'Github-Drupal module settings', 
+		'description' => 'Set the account name to load public repositories (private repos are skipped in this version)', 
+		'page callback' => 'drupal_get_form', 
+		'page arguments' => array('githubdrupal_admin_settings'), 
+		'access arguments' => array('administer githubdrupal settings'), 
+		'type' => MENU_NORMAL_ITEM, ); 
+		
+	 return $items;
+}
+
+/**
+ * output for main page 
+ */
+function githubdrupal_output(){
+  header('Content-type: text/plain; charset=UTF-8');
+  header('Content-Disposition: inline');
+
+  /* $repo_data = file_get_contents("https://github.com/sjlawson?tab=repositories");
+
+  $listPos = strpos($repo_data, '<ul class="repolist');
+
+  $endPos = strpos($repo_data, '</ul>', $listPos) + 5;
+  $list = substr($repo_data, $listPos, $endPos)."</div>";
+ */
+  $gituser = get_gituser();
+  $url = "https://api.github.com/users/$gituser/repos";
+  $repo_data = json_decode(get_githubrequest($url), true);
+  
+  $ownerUrl = $repo_data[0]['owner']['html_url'];
+  $ownerGravatar = $repo_data[0]['owner']['avatar_url'];
+  
+  $list = "<ul class='repositories'>";
+  foreach ($repo_data as $repository) {
+  	if(!$repository['private'] || $repository['private'] == "false")
+	  	$list .= "<li><a href='". $repository['html_url'] ."' target='_blank' >".$repository['name']."</a><br /><span class='indent'>". 
+	  	$repository['description']. "</span></li>";
+  }
+  
+  $list .= "</ul>";
+  
+  return '<h3>GitHub Repositories</h3>
+  <div class="gravatar"><a href="'. $ownerUrl.'" target="_blank" >
+  <img src="'. $ownerGravatar .'" /></a></div>
+  Owner: <a href="'.$ownerUrl.'" target="_blank" >'. $gituser.'</a><br /><br />' .$list;
+
+	}
+
+/**
+ * returns a Drupal admin form
+ */
+function githubdrupal_admin_settings() {
+	 $form['githubdrupal_username'] = array( 
+	 	'#type' => 'textfield', 
+	 	'#title' => t('GitHub account name'), 
+	 	'#size' => 45, 
+	 	'#maxlength' => 45, 
+	 	'#default_value' => variable_get('githubdrupal_username', ""),
+	 	'#description' => t("The username of your GitHub account"), 
+	 	'#required' => true ); 
+	 
+	 return system_settings_form($form); 
+}
+
+/**
+ * Helper function to return stored information 
+ */
+function get_gituser() {
+	$gituser = variable_get('githubdrupal_username', "default");
+	
+	return $gituser;
+}
+
+/**
+ * Helper funtion to execute a GET request from GitHub
+ */
+function get_githubrequest($url) {
+     
+     $r = new HttpRequest($url, HttpRequest::METH_GET);
+     try {
+         $r->send();
+    	 if ($r->getResponseCode() == 200) {
+	      return $r->getResponseBody();
+    	 }
+     } catch (HttpException $ex) {
+       echo $ex;
+     }
+}
+
+
