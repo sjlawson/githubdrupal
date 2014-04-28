@@ -7,3 +7,6 @@
 .hg
 *~
 .project
+.settings
+.buildpath
+*.komodoproject
