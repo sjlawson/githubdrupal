@@ -1,5 +1,4 @@
 @author Samuel Lawson - github.com/sjlawson, 
-@email sjlawson@sdf.org
 
 GitHubDrupal is meant to allow developers to display a dynamic list of links to their github repositories from a Drupal CMS site. 
 
